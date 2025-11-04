@@ -42,10 +42,10 @@ mongoose
   });
 
 // CONECTANDO MONGOOSE
-mongoose.connect(dbUrl, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+// mongoose.connect(dbUrl, {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+// });
 
 // logica de confirmacao da conexao com o DB.
 const db = mongoose.connection;
