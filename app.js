@@ -1,74 +1,75 @@
-if (process.env.NODE_ENV !== "production") {
-  require("dotenv").config();
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
 }
 // VARIAVEIS DE INICIALIZACAO
-const express = require("express");
-const cors = require("cors");
+const express = require('express');
+const cors = require('cors');
 
-const path = require("path");
-const mongoose = require("mongoose");
+const path = require('path');
+const mongoose = require('mongoose');
 // const ejsMate = require("ejs-mate"); // REMOVIDO: Não usaremos mais EJS
-const session = require("express-session");
-const flash = require("connect-flash"); // banner de mensagens
-const ExpressError = require("./utils/ExpressError");
+const session = require('express-session');
+const flash = require('connect-flash'); // banner de mensagens
+const ExpressError = require('./utils/ExpressError');
 
-const methodOverride = require("method-override");
+const methodOverride = require('method-override');
 // USER AUTHENTICATION
-const passport = require("passport");
-const LocalStrategy = require("passport-local"); // username e password - auth
-const User = require("./models/user");
+const passport = require('passport');
+const LocalStrategy = require('passport-local'); // username e password - auth
+const User = require('./models/user');
 //
-const helmet = require("helmet");
-const mongoSanitize = require("express-mongo-sanitize");
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
 // EXPRESS ROUTES
-const userRoutes = require("./routes/users");
-const campgroundRoutes = require("./routes/campgrounds");
-const reviewRoutes = require("./routes/reviews");
+const userRoutes = require('./routes/users');
+const campgroundRoutes = require('./routes/campgrounds');
+const reviewRoutes = require('./routes/reviews');
 
 // CONEXAO PARA SALVAR UMA EXPRESS SESSION NO MongoDB (MERN)
-const MongoDBStore = require("connect-mongo")(session);
+const MongoDBStore = require('connect-mongo')(session);
 
 // BANCO DE DADOS (dev e prod)
-const dbUrl = process.env.DB_URL || "mongodb://localhost:27017/yelp-camp";
+const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/yelp-camp';
 
 // CONECTANDO MONGOOSE
 mongoose.connect(dbUrl, {
-  // Connect Mongoose e OPTIONS
   useNewUrlParser: true,
-  useCreateIndex: true,
   useUnifiedTopology: true,
-  useFindAndModify: false,
 });
 
 // logica de confirmacao da conexao com o DB.
 const db = mongoose.connection;
-db.on("error", console.error.bind(console, "erro de conexao:"));
-db.once("open", () => {
-  console.log("Banco de Dados conectado");
+db.on('error', console.error.bind(console, 'erro de conexao:'));
+db.once('open', () => {
+  console.log('Banco de Dados conectado');
 });
 
 // EXPRESS
 const app = express();
 
 // CONFIGURAÇÃO DO REACT E CORS
-app.use(cors({
-  origin: "http://localhost:5173", // Permite o acesso do servidor de desenvolvimento do Vite
-  credentials: true, // Permite o envio de cookies (sessão)
-}));
+app.use(
+  cors({
+    origin: 'http://localhost:5173', // Permite o acesso do servidor de desenvolvimento do Vite
+    credentials: true, // Permite o envio de cookies (sessão)
+  })
+);
 // MIDDLEWARE // express parse the body da requisicao - POST form application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
-app.use(methodOverride("_method"));
+app.use(methodOverride('_method'));
 // SERVE ARQUIVOS ESTÁTICOS DO BACKEND (public)
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, 'public')));
 // MONGO SANITIZE
 app.use(
   mongoSanitize({
-    replaceWith: "_",
+    replaceWith: '_',
   })
 );
+// Adicione esta linha após as outras configurações do express
+app.use(express.json());
 // COOKIE dev e prod
 const secret =
-  process.env.SECRET || "Cuidado com a exposicao da senha de acesso!";
+  process.env.SECRET || 'Cuidado com a exposicao da senha de acesso!';
 // MONGODB EXPRESS SESSION
 const store = new MongoDBStore({
   url: dbUrl,
@@ -77,13 +78,13 @@ const store = new MongoDBStore({
 });
 
 // MONGO EXPRESS SESSION - CONFIGURACAO
-store.on("error", function (e) {
-  console.log("ERRO NO ARMAZENAMENTO DA SESSION no DB", e);
+store.on('error', function (e) {
+  console.log('ERRO NO ARMAZENAMENTO DA SESSION no DB', e);
 });
 
 const sessionConfig = {
   store,
-  name: "session",
+  name: 'session',
   secret,
   resave: false,
   saveUninitialized: true,
@@ -104,25 +105,25 @@ app.use(helmet());
 
 // MAPA MAPBOX URLs - tilesset
 const scriptSrcUrls = [
-  "https://stackpath.bootstrapcdn.com",
-  "https://api.tiles.mapbox.com",
-  "https://api.mapbox.com",
-  "https://kit.fontawesome.com",
-  "https://cdnjs.cloudflare.com",
-  "https://cdn.jsdelivr.net",
+  'https://stackpath.bootstrapcdn.com',
+  'https://api.tiles.mapbox.com',
+  'https://api.mapbox.com',
+  'https://kit.fontawesome.com',
+  'https://cdnjs.cloudflare.com',
+  'https://cdn.jsdelivr.net',
 ];
 const styleSrcUrls = [
-  "https://kit-free.fontawesome.com",
-  "https://stackpath.bootstrapcdn.com",
-  "https://api.mapbox.com",
-  "https://api.tiles.mapbox.com",
-  "https://fonts.googleapis.com",
-  "https://use.fontawesome.com",
+  'https://kit-free.fontawesome.com',
+  'https://stackpath.bootstrapcdn.com',
+  'https://api.mapbox.com',
+  'https://api.tiles.mapbox.com',
+  'https://fonts.googleapis.com',
+  'https://use.fontawesome.com',
 ];
 const connectSrcUrls = [
-  "https://api.mapbox.com",
-  "https://*.tiles.mapbox.com",
-  "https://events.mapbox.com",
+  'https://api.mapbox.com',
+  'https://*.tiles.mapbox.com',
+  'https://events.mapbox.com',
 ];
 
 // HELMET configuration - protege ao acesso de dados das requisicoes
@@ -134,15 +135,15 @@ app.use(
       connectSrc: ["'self'", ...connectSrcUrls],
       scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
       styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
-      workerSrc: ["'self'", "blob:"],
-      childSrc: ["blob:"],
+      workerSrc: ["'self'", 'blob:'],
+      childSrc: ['blob:'],
       objectSrc: [],
       imgSrc: [
         "'self'",
-        "blob:",
-        "data:",
-        "https://res.cloudinary.com/ppconrado/", // CONTA do CLOUDINARY!
-        "https://images.unsplash.com",
+        'blob:',
+        'data:',
+        'https://res.cloudinary.com/ppconrado/', // CONTA do CLOUDINARY!
+        'https://images.unsplash.com',
       ],
       fontSrc: ["'self'", ...fontSrcUrls],
     },
@@ -160,34 +161,36 @@ passport.deserializeUser(User.deserializeUser()); // mongoose - unstorage sessio
 app.use((req, res, next) => {
   // Variaveis locais
   res.locals.currentUser = req.user;
-  res.locals.success = req.flash("success");
-  res.locals.error = req.flash("error");
+  res.locals.success = req.flash('success');
+  res.locals.error = req.flash('error');
   next();
 });
 
 // ROTAS DE API
-app.use("/api", userRoutes);
-app.use("/api/campgrounds", campgroundRoutes);
-app.use("/api/campgrounds/:id/reviews", reviewRoutes);
+app.use('/api', userRoutes);
+app.use('/api/campgrounds', campgroundRoutes);
+app.use('/api/campgrounds/:id/reviews', reviewRoutes);
 
 // ROTA DE FALLBACK PARA SERVIR O INDEX.HTML DO REACT
 // Qualquer rota que não seja uma rota de API será tratada pelo React Router
-app.get("*", (req, res) => {
+app.get('*', (req, res) => {
   // Em produção, serviria o index.html do build do React
   // Por enquanto, vamos apenas garantir que o React lide com o roteamento
-  res.send("Frontend React em desenvolvimento. Use /api para acessar os endpoints.");
+  res.send(
+    'Frontend React em desenvolvimento. Use /api para acessar os endpoints.'
+  );
 });
 
 // ROTAS ERRADAS (somente para API, o resto é tratado pelo React)
 app.use((err, req, res, next) => {
   const { statusCode = 500 } = err;
-  if (!err.message) err.message = "Oh No, Alguma coisa deu errado!";
+  if (!err.message) err.message = 'Oh No, Alguma coisa deu errado!';
   res.status(statusCode).json({ error: err.message, statusCode });
 });
 
 app.use((err, req, res, next) => {
   const { statusCode = 500 } = err;
-  if (!err.message) err.message = "Oh No, Alguma coisa deu errado!";
+  if (!err.message) err.message = 'Oh No, Alguma coisa deu errado!';
   res.status(statusCode).json({ error: err.message, statusCode });
 });
 
