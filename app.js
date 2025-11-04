@@ -31,6 +31,16 @@ const MongoDBStore = require('connect-mongo')(session);
 // BANCO DE DADOS (dev e prod)
 const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/yelp-camp';
 
+// Remova as opções obsoletas e atualize a string de conexão
+mongoose
+  .connect(dbUrl)
+  .then(() => {
+    console.log('Banco de Dados conectado');
+  })
+  .catch((err) => {
+    console.error('Erro na conexão com o banco de dados:', err);
+  });
+
 // CONECTANDO MONGOOSE
 mongoose.connect(dbUrl, {
   useNewUrlParser: true,
